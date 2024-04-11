@@ -1,6 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="maciv2">
 
+    <xacro:include filename="$(find krytn)/robot_description/magni/inertial.xacro" />
     <xacro:include filename="$(find ur_description)/urdf/ur_macro.xacro" />
 
     <xacro:arg name="ur_type" default="ur5e"/>
@@ -9,5 +10,75 @@
         <origin xyz="-0.1 0 0.15" rpy="${pi} 0 0" />
     </xacro:ur_robot>
     <link name="world" />
+
+    <joint name="gripper_joint" type="fixed">
+        <parent link="ur5_tool0" />
+        <child link="gripper_base_link" />
+    </joint>
+
+    <link name="gripper_base_link">
+        <visual>
+            <!--gripper_base-->
+            <origin rpy="0.0 -0.0 0.0" xyz="0.0 0.0 0.0"/>
+            <geometry>
+                <mesh filename="file://$(find maciv2)/robot_description/meshes/Unnamed_gripper_base.dae"/>
+            </geometry>
+        </visual>
+        <collision>
+            <!--gripper_base-->
+            <origin rpy="0.0 -0.0 0.0" xyz="0.0 0.0 0.0"/>
+            <geometry>
+                <mesh filename="file://$(find maciv2)/robot_description/meshes/Unnamed_gripper_base.dae"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <mass value="0.0"/>
+            <origin rpy="0.0 -0.0 0.0" xyz="0.0 0.0 0.0"/>
+            <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0"/>
+        </inertial>
+    </link>
+    <link name="finger_link">
+        <visual>
+            <!--finger-->
+            <origin rpy="0.0 -0.0 0.0" xyz="0.0 0.0 0.0"/>
+            <geometry>
+                <mesh filename="file://$(find maciv2)/robot_description/meshes/Unnamed_finger.dae"/>
+            </geometry>
+        </visual>
+        <collision>
+            <!--finger-->
+            <origin rpy="0.0 -0.0 0.0" xyz="0.0 0.0 0.0"/>
+            <geometry>
+                <mesh filename="file://$(find maciv2)/robot_description/meshes/Unnamed_finger.dae"/>
+            </geometry>
+        </collision>
+        <xacro:box_inertial mass="1" x="0.03" y="0.03" z="0.1" />
+    </link>
+    <joint name="finger_Joint" type="prismatic">
+        <parent link="gripper_base_link"/>
+        <child link="finger_link"/>
+        <origin rpy="0.0 -0.0 0.0" xyz="0.105 0.0 0.053"/>
+        <axis xyz="0 0 1"/>
+        <limit effort="1000.0" lower="-0.08" upper="0.0" velocity="10.0"/>
+    </joint>
+
+    <ros2_control name="maciv2" type="system">
+        <hardware>
+            <plugin>ign_ros2_control/IgnitionSystem</plugin>
+        </hardware>
+        <joint name="finger_Joint">
+            <command_interface name="position"/>
+            <state_interface name="position">
+                <param name="initial_value">0.0</param>
+            </state_interface>
+            <state_interface name="velocity"/>
+        </joint>
+    </ros2_control>
+
+    <gazebo>
+        <plugin filename="ign_ros2_control-system" name="ign_ros2_control::IgnitionROS2ControlPlugin">
+            <parameters>$(find maciv2)/config/ros2_control.yaml</parameters>
+        </plugin>
+    </gazebo>
 
 </robot>
