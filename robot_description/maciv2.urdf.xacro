@@ -77,7 +77,7 @@
 
     <gazebo>
         <plugin filename="ign_ros2_control-system" name="ign_ros2_control::IgnitionROS2ControlPlugin">
-            <parameters>$(find maciv2)/config/ros2_control.yaml</parameters>
+            <parameters>$(find maciv2)/config/ros2_controllers.yaml</parameters>
         </plugin>
     </gazebo>
 
